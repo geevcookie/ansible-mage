@@ -1,0 +1,25 @@
+---
+- name: Add Repository For PHP 7.0
+  apt_repository: repo="ppa:ondrej/php" update_cache=yes
+
+- name: Install Required Packages
+  apt: name={{ item }}
+  with_items:
+    - php7.0
+    - php7.0-cli
+    - php7.0-common
+    - php7.0-gd
+    - php7.0-curl
+    - php7.0-mysql
+    - php7.0-intl
+    - php7.0-fpm
+    - php7.0-mcrypt
+    - php7.0-xsl
+    - php7.0-zip
+    - php7.0-mbstring
+    - php7.0-mcrypt
+
+- name: Increase Memory Limit
+  lineinfile: dest=/etc/php/7.0/cli/php.ini regexp=memory_limit\s*=.* line=memory_limit=256M
+
+- include: composer.yml

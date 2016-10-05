@@ -1,0 +1,69 @@
+- name: Check If .composer Exists
+  stat: "path=~/.composer"
+  register: composer_root
+
+- name: Check If .config/composer Exists
+  stat: "path=~/.config/composer"
+  register: composer_config_root
+
+- name: Add auth.json in .composer
+  template: src=auth.json.j2 dest=/root/.composer/auth.json owner=root group=root mode=0600
+  when: composer_root.stat.exists
+
+- name: Add auth.json in .config/composer
+  template: src=auth.json.j2 dest=/root/.config/composer/auth.json owner=root group=root mode=0600
+  when: composer_config_root.stat.exists
+
+- name: Check If Magento Already Installed
+  stat: "path=/var/www/vendor"
+  register: magento_vendors
+
+- name: Run Magento Metapackage Install
+  command: composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition /var/www
+  when: not magento_vendors.stat.exists
+
+- name: Ensure Magento Command Line Is Executable
+  file: path=/var/www/bin/magento state=touch mode="u+x,g+x"
+
+- include: mysql.yml
+
+- name: Check If Magento Is Already Configured
+  stat: "path=/var/www/app/etc/env.php"
+  register: magento_config
+
+- name: Install Magento
+  command: >
+    /var/www/bin/magento setup:install --backend-frontname="{{ mage_admin_uri }}"
+    --key="{{ mage_key }}"
+    --db-host="{{ mage_db_host }}"
+    --db-name="{{ mage_db_name }}"
+    --db-user="{{ mage_db_user }}"
+    --db-password="{{ mage_db_pass }}"
+    --language="{{ mage_language }}"
+    --currency="{{ mage_currency }}"
+    --timezone="{{ mage_timezone }}"
+    --use-rewrites={{ mage_rewrites }}
+    --use-secure={{ mage_secure }}
+    --base-url="{{ mage_url }}"
+    --base-url-secure="{{ mage_secure_url }}"
+    --admin-user={{ mage_admin_user }}
+    --admin-password={{ mage_admin_pass }}
+    --admin-email={{ mage_admin_email }}
+    --admin-firstname={{ mage_admin_first_name }}
+    --admin-lastname={{ mage_admin_last_name }}
+    --cleanup-database
+  when: not magento_config.stat.exists
+
+- name: Set Up Nginx
+  template: src=default.j2 dest=/etc/nginx/sites-available/default owner=root group=root mode=0644
+
+- name: Restart Nginx
+  service: name=nginx state=restarted
+
+- name: Fix Public Permissions
+  file: path=/var/www/pub owner=www-data group=www-data recurse=yes
+
+- name: Fix var/ Permissions
+  file: path=/var/www/var owner=www-data group=www-data recurse=yes
+
+- include: cron.yml

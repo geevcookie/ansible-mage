@@ -1,0 +1,18 @@
+---
+- name: Create Database
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - CREATE DATABASE IF NOT EXISTS {{ mage_db_name }}
+  changed_when: False
+
+- name: Grant Privileges
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - GRANT ALL PRIVILEGES ON {{ mage_db_name }}.* TO {{ mage_db_user }}@'localhost' IDENTIFIED BY '{{ mage_db_pass }}'
+  changed_when: False
+
+- name: Reload Privilege Tables
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - FLUSH PRIVILEGES
+  changed_when: False

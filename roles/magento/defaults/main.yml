@@ -1,0 +1,19 @@
+---
+mage_admin_uri: admin
+mage_key: 1234567890qwerty
+mage_db_host: localhost
+mage_db_name: magento
+mage_db_user: magento
+mage_db_pass: m@g3nt0
+mage_language: en_GB
+mage_currency: ZAR
+mage_timezone: Africa/Johannesburg
+mage_rewrites: 1
+mage_secure: 0
+mage_url: http://192.168.2.2
+mage_secure_url: https://192.168.2.2
+mage_admin_user: admin
+mage_admin_pass: m@g3nt0
+mage_admin_email: admin@newmagento.com
+mage_admin_first_name: magento
+mage_admin_last_name: user

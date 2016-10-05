@@ -1,0 +1,17 @@
+---
+- name: Check If Cron File Exists
+  stat: "path=/etc/cron.d/magento"
+  register: magento_cron
+
+- name: Create Root Cron Log File
+  file: path=/var/www/var/log/magento.cron.log owner=root group=root state=touch
+
+- name: Create Update Cron Log File
+  file: path=/var/www/var/log/update.cron.log owner=root group=root state=touch
+
+- name: Create Setup Cron Log File
+  file: path=/var/www/var/log/setup.cron.log owner=root group=root state=touch
+
+- name: Create Cron File
+  template: src=magento.j2 dest=/etc/cron.d/magento owner=root group=root mode=0600
+  when: not magento_cron.stat.exists
